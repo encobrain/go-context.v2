@@ -9,21 +9,22 @@ Example:
 package main
 
 import (
-	"fmt"
+    "fmt"
     "github.com/encobrain/go-context.v2"
     "time"
 )
 
 func main () {
-    context.Main.Child("main", func (ctx context.Context){
+    ctx := context.Main.Child("main", func (ctx context.Context){
         ctx.PanicHandlerSet(func (ctx context.Context, panicErr interface{}){
             fmt.Printf("Main panic catch: %s\n", panicErr)
         })
 
         ctx.Child("child", func (ctx context.Context){ 
-            
+            count := ctx.Value("count").(int)
+
             loop:
-            for {
+            for i:=0; i<count; i++ {
                 select {
                 case <-time.After(time.Second):
                     fmt.Printf("Child work...\n")
@@ -44,7 +45,9 @@ func main () {
         <-time.After(time.Second*5)
     
         panic("Oops. Something went wrong")
-    })    
+    })  
+
+    ctx.ValueSet("count", 10)  
     
     <-context.Main.ChildsFinished(true)
     
