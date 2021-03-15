@@ -14,7 +14,7 @@ func (r DeadlineReason) Error() string {
 	return string(r)
 }
 
-var deadlineKey = &struct{}{}
+var deadlineKey = &struct{ bool }{}
 
 type deadlineValue struct {
 	end   time.Time

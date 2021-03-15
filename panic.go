@@ -1,6 +1,6 @@
 package context
 
-var panicHandlerKey = &struct{}{}
+var panicHandlerKey = &struct{ bool }{}
 
 func (c *ctx) panicHandle(panicErr interface{}) {
 	sc := c
