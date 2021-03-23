@@ -68,8 +68,11 @@ func (c *ctx) Childs() []Context {
 
 	ret := make([]Context, len(c.childs.list))
 
-	for i, cc := range c.childs.list {
+	i := 0
+
+	for _, cc := range c.childs.list {
 		ret[i] = cc
+		i++
 	}
 
 	return ret

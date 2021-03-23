@@ -57,7 +57,7 @@ type ctx struct {
 		nextId   uint64
 		runs     sync.WaitGroup
 		runsTree sync.WaitGroup
-		list     map[uint64]*ctx
+		list     map[uint64]*ctx // id:*ctx
 	}
 }
 
