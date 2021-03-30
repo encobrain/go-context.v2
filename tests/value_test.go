@@ -22,7 +22,7 @@ func TestValue(t *testing.T) {
 		done := make(chan interface{})
 		context.Main.Child("child", func(ctx context.Context) {
 			done <- ctx.Value("test")
-		})
+		}).Go()
 
 		So(<-done, ShouldEqual, setV)
 	})
@@ -35,7 +35,7 @@ func TestValue(t *testing.T) {
 			ctx.ValueSet("test", setV2)
 
 			done <- ctx.Value("test")
-		})
+		}).Go()
 
 		So(<-done, ShouldEqual, setV2)
 		So(context.Main.Value("test"), ShouldEqual, setV)
@@ -45,11 +45,9 @@ func TestValue(t *testing.T) {
 		setV3 := setV + 2
 		done := make(chan interface{})
 
-		ctx := context.Main.Child("child3", func(ctx context.Context) {
+		context.Main.Child("child3", func(ctx context.Context) {
 			done <- ctx.Value("test")
-		})
-
-		ctx.ValueSet("test", setV3)
+		}).ValueSet("test", setV3).Go()
 
 		So(<-done, ShouldEqual, setV3)
 		So(context.Main.Value("test"), ShouldEqual, setV)
@@ -59,14 +57,15 @@ func TestValue(t *testing.T) {
 		setV4 := setV + 3
 		done := make(chan interface{})
 		changed := make(chan interface{})
+
 		ctx := context.Main.Child("child4", func(ctx context.Context) {
 			ctx.Child("child4.1", func(ctx context.Context) {
 				done <- ctx.Value("test")
 				<-changed
 				done <- ctx.Value("test")
-			})
-		})
-		ctx.ValueSet("test", setV4)
+			}).Go()
+		}).ValueSet("test", setV4).Go()
+
 		So(<-done, ShouldEqual, setV4)
 		setV5 := setV4 + 1
 		ctx.ValueSet("test", setV5)

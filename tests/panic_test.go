@@ -19,7 +19,7 @@ func TestPanic(t *testing.T) {
 			})
 
 			panic(panicVal)
-		})
+		}).Go()
 
 		select {
 		case v := <-done:
@@ -48,8 +48,8 @@ func TestPanic(t *testing.T) {
 
 			ctx.Child("child", func(ctx context.Context) {
 				panic(panicVal)
-			})
-		})
+			}).Go()
+		}).Go()
 
 		select {
 		case v := <-done:

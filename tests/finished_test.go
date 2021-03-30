@@ -13,7 +13,7 @@ func TestFinished(t *testing.T) {
 		done := int32(0)
 		ctx := context.Main.Child("test", func(ctx context.Context) {
 			atomic.AddInt32(&done, 1)
-		})
+		}).Go()
 
 		select {
 		case <-ctx.Finished(false):
@@ -28,11 +28,11 @@ func TestFinished(t *testing.T) {
 		ctx := context.Main.Child("test2", func(ctx context.Context) {
 			ctx.Child("test2.1", func(ctx context.Context) {
 				atomic.AddInt32(&done, 1)
-			})
+			}).Go()
 			ctx.Child("test2.2", func(ctx context.Context) {
 				atomic.AddInt32(&done, 2)
-			})
-		})
+			}).Go()
+		}).Go()
 
 		<-ctx.Finished(false)
 
@@ -50,13 +50,13 @@ func TestFinished(t *testing.T) {
 		ctx := context.Main.Child("test2", func(ctx context.Context) {
 			ctx.Child("test2.1", func(ctx context.Context) {
 				atomic.AddInt32(&done, 1)
-			})
+			}).Go()
 			ctx.Child("test2.2", func(ctx context.Context) {
 				atomic.AddInt32(&done, 2)
-			})
+			}).Go()
 
 			atomic.AddInt32(&done, 4)
-		})
+		}).Go()
 
 		select {
 		case <-ctx.Finished(true):
@@ -72,13 +72,13 @@ func TestFinished(t *testing.T) {
 			ctx.Child("test2.1", func(ctx context.Context) {
 				ctx.Child("test.2.1.1", func(ctx context.Context) {
 					atomic.AddInt32(&done, 4)
-				})
+				}).Go()
 				atomic.AddInt32(&done, 1)
-			})
+			}).Go()
 			ctx.Child("test2.2", func(ctx context.Context) {
 				atomic.AddInt32(&done, 2)
-			})
-		})
+			}).Go()
+		}).Go()
 
 		<-ctx.Finished(false)
 

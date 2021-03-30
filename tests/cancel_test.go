@@ -16,7 +16,7 @@ func TestCancel(t *testing.T) {
 		ctx := context.Main.Child("cancel", func(ctx context.Context) {
 			<-ctx.Done()
 			done <- ctx.Err()
-		})
+		}).Go()
 
 		ctx.Cancel(cancelReason)
 
@@ -38,7 +38,7 @@ func TestCancel(t *testing.T) {
 			<-canceled
 			<-ctx.Done()
 			done <- ctx.Err()
-		})
+		}).Go()
 
 		ctx.Cancel(cancelReason1)
 		ctx.Cancel(cancelReason2)
@@ -60,13 +60,13 @@ func TestCancel(t *testing.T) {
 			ctx.Child("child1", func(ctx context.Context) {
 				<-ctx.Done()
 				done <- ctx.Err()
-			})
+			}).Go()
 
 			ctx.Child("child2", func(ctx context.Context) {
 				<-ctx.Done()
 				done <- ctx.Err()
-			})
-		})
+			}).Go()
+		}).Go()
 
 		ctx.Cancel(cancelReason)
 
@@ -89,14 +89,14 @@ func TestCancel(t *testing.T) {
 		done := make(chan interface{})
 		cancelReason := fmt.Errorf("cancel")
 
-		ctx := context.Main.Child("parent", func(ctx context.Context) {})
+		ctx := context.Main.Child("parent", func(ctx context.Context) {}).Go()
 
 		ctx.Cancel(cancelReason)
 
 		ctx.Child("child", func(ctx context.Context) {
 			<-ctx.Done()
 			done <- ctx.Err()
-		})
+		}).Go()
 
 		select {
 		case r := <-done:

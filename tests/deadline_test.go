@@ -10,7 +10,7 @@ import (
 
 func TestDeadline(t *testing.T) {
 	Convey("Set is ok on get", t, func() {
-		ctx := context.Main.Child("name", func(ctx context.Context) {})
+		ctx := context.Main.Child("name", func(ctx context.Context) {}).Go()
 
 		dlv := time.Now().Add(time.Millisecond * 100)
 
@@ -29,7 +29,7 @@ func TestDeadline(t *testing.T) {
 		ctx := context.Main.Child("name", func(ctx context.Context) {
 			<-ctx.Done()
 			done <- ctx.Err()
-		})
+		}).Go()
 
 		ctx.DeadlineSet(time.Now().Add(time.Millisecond*100), dlReason)
 
@@ -52,9 +52,8 @@ func TestDeadline(t *testing.T) {
 			case <-time.After(time.Millisecond * 150):
 				done <- "ok"
 			}
-		})
+		}).DeadlineSet(time.Now().Add(time.Millisecond*100), nil).Go()
 
-		ctx.DeadlineSet(time.Now().Add(time.Millisecond*100), nil)
 		<-time.After(time.Millisecond * 50)
 		ctx.DeadlineSet(time.Time{}, nil)
 
@@ -74,8 +73,8 @@ func TestDeadline(t *testing.T) {
 			done <- ctx.Child("child", func(ctx context.Context) {
 				<-ctx.Done()
 				done <- ctx.Err()
-			})
-		})
+			}).Go()
+		}).Go()
 
 		childCtx := (<-done).(context.Context)
 
