@@ -1,11 +1,15 @@
 package context
 
-func (c *ctx) Go() {
+func (c *ctx) Go() (cc Context) {
+	cc = c
+
 	defer func() {
 		recover()
 	}()
 
 	close(c.started)
+
+	return
 }
 
 func (c *ctx) Done() (done <-chan struct{}) {

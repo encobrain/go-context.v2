@@ -10,7 +10,8 @@ type Context interface {
 	context.Context
 
 	// Go starts context if not started
-	Go()
+	// Returns this context
+	Go() Context
 	// Name gets current context name
 	Name() string
 	// Cancel cancels current context and all childs contexts.
