@@ -33,6 +33,8 @@ func (c *ctx) Child(name string, worker func(childCtx Context)) (childCtx Contex
 }
 
 func (c *ctx) run(worker func(childCtx Context)) {
+	<-c.started
+
 	defer func() {
 		if panicErr := recover(); panicErr != nil {
 			c.panicHandle(panicErr)

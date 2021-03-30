@@ -1,5 +1,13 @@
 package context
 
+func (c *ctx) Go() {
+	defer func() {
+		recover()
+	}()
+
+	close(c.started)
+}
+
 func (c *ctx) Done() (done <-chan struct{}) {
 	return c.done
 }
@@ -11,8 +19,9 @@ func (c *ctx) Err() (err error) {
 	return c.err
 }
 
-func (c *ctx) ValueSet(key interface{}, value interface{}) {
+func (c *ctx) ValueSet(key interface{}, value interface{}) Context {
 	c.value.Store(key, value)
+	return c
 }
 
 func (c *ctx) Value(key interface{}) (value interface{}) {

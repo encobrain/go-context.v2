@@ -15,9 +15,11 @@ import (
 )
 
 func main () {
-    ctx := context.Main.Child("main", func (ctx context.Context){
+    context.Main.Child("main", func (ctx context.Context){
         ctx.PanicHandlerSet(func (ctx context.Context, panicErr interface{}){
             fmt.Printf("Main panic catch: %s\n", panicErr)
+        
+            ctx.Cancel(fmt.Errorf("Main panic: %s", panicErr))
         })
 
         ctx.Child("child", func (ctx context.Context){ 
@@ -27,7 +29,7 @@ func main () {
             for i:=0; i<count; i++ {
                 select {
                 case <-time.After(time.Second):
-                    fmt.Printf("Child work...\n")
+                    fmt.Printf("Child work... %d\n", i)
                 case <-ctx.Done():
                     break loop
                 }       
@@ -38,16 +40,15 @@ func main () {
             <-time.After(time.Second)
 
             fmt.Printf("Child finished")
-        })
+        }).Go()
         
         fmt.Printf("Main long execution...\n")
 
         <-time.After(time.Second*5)
     
         panic("Oops. Something went wrong")
-    })  
-
-    ctx.ValueSet("count", 10)  
+        
+    }).ValueSet("count", 10).Go()
     
     <-context.Main.ChildsFinished(true)
     

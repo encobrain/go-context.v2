@@ -34,6 +34,7 @@ func (c *ctx) panicHandle(panicErr interface{}) {
 	}
 }
 
-func (c *ctx) PanicHandlerSet(handler func(ctx Context, panic interface{})) {
+func (c *ctx) PanicHandlerSet(handler func(ctx Context, panic interface{})) Context {
 	c.value.Store(panicHandlerKey, handler)
+	return c
 }

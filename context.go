@@ -9,6 +9,8 @@ import (
 type Context interface {
 	context.Context
 
+	// Go starts context if not started
+	Go()
 	// Name gets current context name
 	Name() string
 	// Cancel cancels current context and all childs contexts.
@@ -19,15 +21,18 @@ type Context interface {
 	// If fully == true - waits for finish all childs tree before itself
 	Finished(fully bool) (is <-chan struct{})
 	// ValueSet sets key/value pair in current context
-	ValueSet(key interface{}, value interface{})
+	// Returns this context
+	ValueSet(key interface{}, value interface{}) Context
 	// DeadlineSet sets deadline for context and done it if deadline reaches.
 	// If reason not set - creates it with description of deadline.
 	// If end.IsZero() - clears deadline
-	DeadlineSet(end time.Time, reason error)
+	// Returns this context
+	DeadlineSet(end time.Time, reason error) Context
 	// PanicHandlerSet sets panic handler in current context.
 	// If it not set in context - panic will be thrown to parent.
 	// If not found any handlers - process panics
-	PanicHandlerSet(handler func(ctx Context, panicVal interface{}))
+	// Returns this context
+	PanicHandlerSet(handler func(ctx Context, panicVal interface{})) Context
 	// Child runs new context and inherits all variables.
 	// If current context done - child will be canceled also.
 	// WARN: If name empty - sets to file:line of call
@@ -48,6 +53,7 @@ type ctx struct {
 
 	name     string
 	lock     sync.RWMutex
+	started  chan struct{}
 	done     chan struct{}
 	finished chan struct{}
 	err      error
@@ -66,6 +72,7 @@ func newCtx(id uint64, name string, parent *ctx) *ctx {
 		id:       id,
 		name:     name,
 		parent:   parent,
+		started:  make(chan struct{}),
 		done:     make(chan struct{}),
 		finished: make(chan struct{}),
 	}

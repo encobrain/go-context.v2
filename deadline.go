@@ -39,20 +39,20 @@ func (c *ctx) deadlineCancel() {
 	}
 }
 
-func (c *ctx) DeadlineSet(end time.Time, reason error) {
+func (c *ctx) DeadlineSet(end time.Time, reason error) Context {
 	dl, ok := c.value.Load(deadlineKey)
 
 	if ok {
 		dlv := dl.(*deadlineValue)
 
 		if !dlv.timer.Stop() {
-			return
+			return c
 		}
 	}
 
 	if end.IsZero() {
 		c.value.Delete(deadlineKey)
-		return
+		return c
 	}
 
 	c.value.Store(deadlineKey, &deadlineValue{
@@ -61,6 +61,8 @@ func (c *ctx) DeadlineSet(end time.Time, reason error) {
 			c.deadlineExceeded(reason)
 		}),
 	})
+
+	return c
 }
 
 func (c *ctx) Deadline() (end time.Time, ok bool) {
