@@ -65,4 +65,23 @@ func TestPanic(t *testing.T) {
 			So(false, ShouldEqual, true)
 		}
 	})
+
+	Convey("Wait childs finished in panic handler success", t, func(c C) {
+		ctx := context.Main.Child("parent", func(ctx context.Context) {
+			ctx.PanicHandlerSet(func(ctx context.Context, panicVal interface{}) {
+				<-ctx.ChildsFinished(true)
+			})
+
+			ctx.Child("child", func(ctx context.Context) {
+				panic("fail")
+			}).Go()
+		}).Go()
+
+		select {
+		case <-ctx.Finished(true):
+		case <-time.After(time.Second):
+			So(false, ShouldEqual, true)
+
+		}
+	})
 }

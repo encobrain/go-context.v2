@@ -36,16 +36,18 @@ func (c *ctx) run(worker func(childCtx Context)) {
 	<-c.started
 
 	defer func() {
-		if panicErr := recover(); panicErr != nil {
-			c.panicHandle(panicErr)
-		}
-
 		close(c.finished)
 
 		if par := c.parent; par != nil {
-			par.childFinished(c)
-			c.childs.runsTree.Wait()
-			par.childTreeFinished(c)
+			go func() {
+				par.childFinished(c)
+				c.childs.runsTree.Wait()
+				par.childTreeFinished(c)
+			}()
+		}
+
+		if panicErr := recover(); panicErr != nil {
+			c.panicHandle(panicErr)
 		}
 	}()
 
