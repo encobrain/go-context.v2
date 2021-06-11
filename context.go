@@ -46,6 +46,8 @@ type Context interface {
 	ChildsFinished(fully bool) <-chan struct{}
 	// ChildsCancel cancels all childs contexts
 	ChildsCancel(reason error)
+	// Parent returns parent context if exists
+	Parent() Context
 }
 
 type ctx struct {

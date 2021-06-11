@@ -64,3 +64,7 @@ func (c *ctx) Finished(fully bool) (is <-chan struct{}) {
 
 	return ch
 }
+
+func (c *ctx) Parent() Context {
+	return c.parent
+}
